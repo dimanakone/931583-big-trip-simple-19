@@ -168,19 +168,21 @@ function createPointTripAddTemplate() {
 }
 
 export default class PointTripAddView {
-  getTemplate() {
+  #element = null;
+
+  get template() {
     return createPointTripAddTemplate();
   }
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
+  get element() {
+    if (!this.#element) {
+      this.#element = createElement(this.template);
     }
 
-    return this.element;
+    return this.#element;
   }
 
   removeElement() {
-    this.element = null;
+    this.#element = null;
   }
 }

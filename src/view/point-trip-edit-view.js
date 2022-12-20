@@ -107,25 +107,30 @@ function createPointTripEditTemplate(point, destinations, typies) {
 }
 
 export default class PointTripEditView {
+  #point = null;
+  #destinations = null;
+  #typies = null;
+  #element = null;
+
   constructor({ point, destinations, typies }) {
-    this.point = point;
-    this.destinations = destinations;
-    this.typies = typies;
+    this.#point = point;
+    this.#destinations = destinations;
+    this.#typies = typies;
   }
 
-  getTemplate() {
-    return createPointTripEditTemplate(this.point, this.destinations, this.typies);
+  get template() {
+    return createPointTripEditTemplate(this.#point, this.#destinations, this.#typies);
   }
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
+  get element() {
+    if (!this.#element) {
+      this.#element = createElement(this.template);
     }
 
-    return this.element;
+    return this.#element;
   }
 
   removeElement() {
-    this.element = null;
+    this.#element = null;
   }
 }

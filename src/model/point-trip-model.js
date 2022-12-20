@@ -11,20 +11,20 @@ const destinations = getDestinationsData();
 const getPoint = () => generatePoint(offersByType,destinations);
 
 export default class PointsModel {
-  offersByType = offersByType;
-  destinations = destinations;
-  points = Array.from({length: TASK_COUNT}, getPoint);
+  #offersByType = offersByType;
+  #destinations = destinations;
+  #points = Array.from({length: TASK_COUNT}, getPoint);
 
-  getPoints() {
-    return this.points;
+  get points() {
+    return this.#points;
   }
 
-  getAllDestinations() {
-    return this.destinations;
+  get allDestinations() {
+    return this.#destinations;
   }
 
-  getAllOffersByType() {
-    return this.offersByType;
+  get allOffersByType() {
+    return this.#offersByType;
   }
 }
 
