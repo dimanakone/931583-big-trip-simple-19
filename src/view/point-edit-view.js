@@ -1,12 +1,12 @@
 import { createElement } from '../render.js';
 import { getDateFormat } from '../util.js';
 
-function createPointTripEditTemplate(point, destinations, typies) {
+function createPointEditTemplate(point, destinations, offerTypes) {
 
   const { dateFrom, dateTo, type, destination, price, offers } = point;
 
   const createTypeListMarkup = () => {
-    const typeList = typies.map((el) => el.type);
+    const typeList = offerTypes.map((el) => el.type);
     return typeList
       .map((item) => `<div class="event__type-item">
         <input id="event-type-${item}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${item}">
@@ -106,20 +106,20 @@ function createPointTripEditTemplate(point, destinations, typies) {
   );
 }
 
-export default class PointTripEditView {
+export default class PointEditView {
   #point = null;
   #destinations = null;
-  #typies = null;
+  #offerTypes = null;
   #element = null;
 
-  constructor({ point, destinations, typies }) {
+  constructor({ point, destinations, offerTypes }) {
     this.#point = point;
     this.#destinations = destinations;
-    this.#typies = typies;
+    this.#offerTypes = offerTypes;
   }
 
   get template() {
-    return createPointTripEditTemplate(this.#point, this.#destinations, this.#typies);
+    return createPointEditTemplate(this.#point, this.#destinations, this.#offerTypes);
   }
 
   get element() {

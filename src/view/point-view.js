@@ -1,8 +1,11 @@
 import {createElement} from '../render.js';
 import {getDateISO, getDateHoursMinutes, getDateMonthDay} from '../util.js';
 
-function createPointTripTemplate(points) {
+function createPointTemplate(points, destinations) {
+
   const {dateFrom, dateTo, type, destination, price, offers} = points;
+
+  console.log(offers);
 
   const createOfferElementMarkup = (offer) =>
     `<li class="event__offer">
@@ -11,7 +14,9 @@ function createPointTripTemplate(points) {
       <span class="event__offer-price">${offer.price}</span>
     </li>`;
 
-  const offersListMarkup = offers.map((item) => createOfferElementMarkup(item)).join(' ');
+  const offersListMarkup = offers.filter((item) => item.isChecked === true).map((item) => createOfferElementMarkup(item)).join(' ');
+  const destinationMarkup = destinations.find((el) => el.id === destination).name;
+
 
   return (
     `<li class="trip-events__item">
@@ -20,7 +25,7 @@ function createPointTripTemplate(points) {
       <div class="event__type">
         <img class="event__type-icon" width="42" height="42" src="img/icons/${type}.png" alt="Event type icon">
       </div>
-      <h3 class="event__title">${type} ${destination}m</h3>
+      <h3 class="event__title">${type} ${destinationMarkup}</h3>
       <div class="event__schedule">
         <p class="event__time">
           <time class="event__start-time" datetime="${getDateISO(dateFrom)}">${getDateHoursMinutes(dateFrom)}</time>
@@ -43,16 +48,18 @@ function createPointTripTemplate(points) {
   );
 }
 
-export default class PointTripView {
+export default class PointView {
   #point = null;
+  #destinations = null;
   #element = null;
 
-  constructor({point}) {
+  constructor({point, destinations}) {
     this.#point = point;
+    this.#destinations = destinations;
   }
 
   get template() {
-    return createPointTripTemplate(this.#point);
+    return createPointTemplate(this.#point, this.#destinations);
   }
 
   get element() {
