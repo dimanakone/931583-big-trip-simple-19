@@ -5,7 +5,7 @@ import PointEditView from '../view/point-edit-view.js';
 import PointAddView from '../view/point-add-view.js';
 import NoPointView from '../view/no-point-view.js';
 
-import { render } from '../render.js';
+import {render, replace} from '../framework/render.js';
 
 export default class PointsPresenter {
   #pointsComponent = new PointsListView();
@@ -29,38 +29,43 @@ export default class PointsPresenter {
   }
 
   #renderPoint(point, destinations, offerTypes) {
-    const pointComponent = new PointView({point, destinations});
-    const pointEditComponent = new PointEditView({point, destinations, offerTypes});
-
-    const replaceCardToForm = () => {
-      this.#pointsComponent.element.replaceChild(pointEditComponent.element, pointComponent.element);
-    };
-    const replaceFormToCard = () => {
-      this.#pointsComponent.element.replaceChild(pointComponent.element, pointEditComponent.element);
-    };
     const escKeyDownHandler = (evt) => {
       if (evt.key === 'Escape' || evt.key === 'Esc') {
         evt.preventDefault();
-        replaceFormToCard();
+        replaceFormToCard.call(this);
         document.removeEventListener('keydown', escKeyDownHandler);
       }
     };
 
-    pointComponent.element.querySelector('.event__rollup-btn').addEventListener('click', () => {
-      replaceCardToForm();
-      document.addEventListener('keydown', escKeyDownHandler);
+    const pointComponent = new PointView({
+      point,
+      destinations,
+      onEditClick: () => {
+        replaceCardToForm.call(this);
+        document.addEventListener('keydown', escKeyDownHandler);
+      }
     });
 
-    pointEditComponent.element.querySelector('.event__rollup-btn').addEventListener('click', () => {
-      replaceFormToCard();
-      document.removeEventListener('keydown', escKeyDownHandler);
+    const pointEditComponent = new PointEditView({
+      point,
+      destinations,
+      offerTypes,
+      onFormSubmit: () => {
+        replaceFormToCard.call(this);
+        document.removeEventListener('keydown', escKeyDownHandler);
+      },
+      onEditClick: () => {
+        replaceFormToCard.call(this);
+        document.removeEventListener('keydown', escKeyDownHandler);
+      }
     });
 
-    pointEditComponent.element.querySelector('form').addEventListener('submit', (evt) => {
-      evt.preventDefault();
-      replaceFormToCard();
-      document.removeEventListener('keydown', escKeyDownHandler);
-    });
+    function replaceCardToForm() {
+      replace(pointEditComponent, pointComponent);
+    }
+    function replaceFormToCard() {
+      replace(pointComponent, pointEditComponent);
+    }
 
     render(pointComponent, this.#pointsComponent.element);
   }

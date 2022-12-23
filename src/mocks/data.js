@@ -3,7 +3,7 @@ import {
   getRandomElementArray,
   getRandomDate,
   increaseRandomDate,
-} from '../util.js';
+} from '../utils/common.js';
 
 const TRIP_TYPES = ['taxi', 'bus', 'train', 'ship', 'drive', 'flight', 'check-in', 'sightseeing', 'restaurant'];
 const DESCRIPTIONS = [
