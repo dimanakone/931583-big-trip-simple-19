@@ -5,6 +5,8 @@ import PointEditView from '../view/point-edit-view.js';
 import PointAddView from '../view/point-add-view.js';
 import NoPointView from '../view/no-point-view.js';
 
+import { sort } from '../utils/sort.js';
+
 import {render, replace} from '../framework/render.js';
 
 export default class PointsPresenter {
@@ -74,7 +76,7 @@ export default class PointsPresenter {
     if (this.#pointsList.length === 0) {
       render(new NoPointView(), this.#pointsContainer);
     } else {
-      render(new SortView(), this.#pointsContainer);
+      render(new SortView(sort), this.#pointsContainer);
       render(this.#pointsComponent, this.#pointsContainer);
       for (let i = 0; i < this.#pointsList.length; i++) {
         this.#renderPoint(this.#pointsList[i], this.#allDestinationsList, this.#allOffersByTypeList);
