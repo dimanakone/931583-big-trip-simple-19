@@ -7,7 +7,7 @@ import NoPointView from '../view/no-point-view.js';
 
 import PointPresenter from './point-presenter.js';
 
-import { sortData, sortCallbackMap } from '../utils/sort.js';
+import { sortData, sortCallbackMap, sortStartDateUp } from '../utils/sort.js';
 import {updateItem} from '../utils/common.js';
 import {SortType} from '../utils/const.js';
 
@@ -33,7 +33,7 @@ export default class PointsPresenter {
   }
 
   init() {
-    this.#pointsList = [...this.#pointsModel.points];
+    this.#pointsList = [...this.#pointsModel.points].sort(sortStartDateUp);
     this.#sourcedPointsList = [...this.#pointsModel.points];
     this.#allDestinationsList = [...this.#pointsModel.allDestinations];
     this.#allOffersByTypeList = [...this.#pointsModel.allOffersByType];
@@ -46,7 +46,7 @@ export default class PointsPresenter {
   };
 
 
-  #handleTaskChange = (updatedPoint) => {
+  #handlePointChange = (updatedPoint) => {
     this.#pointsList = updateItem(this.#pointsList, updatedPoint);
     this.#sourcedPointsList = updateItem(this.#sourcedPointsList, updatedPoint);
     this.#pointPresenter.get(updatedPoint.id).init(updatedPoint);
@@ -55,8 +55,6 @@ export default class PointsPresenter {
   #sortPoints(sortType) {
     switch(sortType) {
       case SortType.DAY:
-        console.log(this.#pointsList);
-        console.log(this.#pointsList.sort(sortCallbackMap[SortType.DAY]));
         this.#pointsList.sort(sortCallbackMap[SortType.DAY]);
         break;
       case SortType.PRICE:
