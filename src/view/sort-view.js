@@ -5,7 +5,7 @@ function createSortItemTemplate(sortItem) {
 
   return (
     `<div class="trip-sort__item  trip-sort__item--${value}">
-      <input id="sort-${value}" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-${value}" ${disabled ? 'disabled' : ''}>
+      <input id="sort-${value}" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" data-sort-type="${value}" value="sort-${value}" ${disabled ? 'disabled' : ''}>
       <label class="trip-sort__btn" for="sort-${value}">${title}</label>
     </div>`
   );

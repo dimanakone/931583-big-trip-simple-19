@@ -27,7 +27,7 @@ const sortData = Object.entries(sortTitleMap)
   });
 
 const sortCallbackMap = {
-  [SortType.DAY]: (point, nextPoint) => point.startDateAsNumber - nextPoint.startDateAsNumber,
+  [SortType.DAY]: (point, nextPoint) => point.dateTo - nextPoint.dateTo,
   [SortType.EVENT]: () => 0,
   [SortType.TIME]: () => 0,
   [SortType.PRICE]: (point, nextPoint) => nextPoint.basePrice - point.basePrice,

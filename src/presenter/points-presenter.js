@@ -7,8 +7,9 @@ import NoPointView from '../view/no-point-view.js';
 
 import PointPresenter from './point-presenter.js';
 
-import { sortData } from '../utils/sort.js';
+import { sortData, sortCallbackMap } from '../utils/sort.js';
 import {updateItem} from '../utils/common.js';
+import {SortType} from '../utils/const.js';
 
 export default class PointsPresenter {
   #pointsComponent = new PointsListView();
@@ -20,12 +21,11 @@ export default class PointsPresenter {
 
   #pointsContainer = null;
   #pointsList = [];
-  #sourcedPointsList = [];
   #allDestinationsList = [];
   #allOffersByTypeList = [];
-
   #pointPresenter = new Map();
-
+  #sourcedPointsList = [];
+  #currentSortType = SortType.DAY;
 
   constructor({ pointsContainer, pointsModel }) {
     this.#pointsContainer = pointsContainer;
@@ -48,30 +48,35 @@ export default class PointsPresenter {
 
   #handleTaskChange = (updatedPoint) => {
     this.#pointsList = updateItem(this.#pointsList, updatedPoint);
+    this.#sourcedPointsList = updateItem(this.#sourcedPointsList, updatedPoint);
     this.#pointPresenter.get(updatedPoint.id).init(updatedPoint);
   };
 
   #sortPoints(sortType) {
     switch(sortType) {
-      case SORT_TYPE.PRICE:
-        this.#pointsList.sort(sortPrice);
+      case SortType.DAY:
+        console.log(this.#pointsList);
+        console.log(this.#pointsList.sort(sortCallbackMap[SortType.DAY]));
+        this.#pointsList.sort(sortCallbackMap[SortType.DAY]);
         break;
-      case SORT_TYPE.TIME:
-        this.#pointsList.sort(sortTime);
+      case SortType.PRICE:
+        this.#pointsList.sort(sortCallbackMap[SortType.PRICE]);
         break;
       default:
         this.#pointsList = [...this.#sourcedPointsList];
     }
-    this._currentSortType = sortType;
+    this.#currentSortType = sortType;
   }
 
-  #handleSortTypeChange(sortType) {
-    if (this._currentSortType === sortType) {
+  #handleSortTypeChange = (sortType) => {
+    if (this.#currentSortType === sortType) {
       return;
     }
 
-    this._sortPoints(sortType);
-  }
+    this.#sortPoints(sortType);
+    this.#clearPointsList();
+    this.#renderPointsList();
+  };
 
   #renderSort() {
     this.#sortComponent = new SortView({
