@@ -4,6 +4,7 @@ import {
   getRandomDate,
   increaseRandomDate,
 } from '../utils/common.js';
+import { nanoid } from 'nanoid';
 
 const TRIP_TYPES = ['taxi', 'bus', 'train', 'ship', 'drive', 'flight', 'check-in', 'sightseeing', 'restaurant'];
 const DESCRIPTIONS = [
@@ -110,6 +111,7 @@ const generatePoint = (offers, destinations) => {
   const typeOffers = offers.find((el) => el.type === type ).offers;
 
   return {
+    id: nanoid(),
     price: getRandomInt(50, 1000),
     dateFrom: date,
     dateTo: increaseRandomDate(date),

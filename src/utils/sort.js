@@ -16,7 +16,7 @@ const sortDisabilityMap = {
   [SortType.OFFERS]: true
 };
 
-const sort = Object.entries(sortTitleMap)
+const sortData = Object.entries(sortTitleMap)
   .map(([value, title]) => {
     const disabled = sortDisabilityMap[value];
     return {
@@ -34,4 +34,4 @@ const sortCallbackMap = {
   [SortType.OFFERS]: () => 0
 };
 
-export { sort, sortCallbackMap };
+export { sortData, sortCallbackMap };

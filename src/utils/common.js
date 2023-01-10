@@ -18,9 +18,14 @@ const increaseRandomDate = (date, minuteRange = 60, hourRange = 5) => {
   return newDate;
 };
 
+function updateItem(items, update) {
+  return items.map((item) => item.id === update.id ? update : item);
+}
+
 export {
   getRandomInt,
   getRandomElementArray,
   getRandomDate,
-  increaseRandomDate
+  increaseRandomDate,
+  updateItem
 };
