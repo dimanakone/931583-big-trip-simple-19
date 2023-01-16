@@ -38,7 +38,7 @@ export default class PointsPresenter {
     this.#allDestinationsList = [...this.#pointsModel.allDestinations];
     this.#allOffersByTypeList = [...this.#pointsModel.allOffersByType];
 
-    this.#renderBoard();
+    this.#renderTripPoints();
   }
 
   #handleModeChange = () => {
@@ -108,7 +108,7 @@ export default class PointsPresenter {
     render(this.#noPointsComponent, this.#pointsContainer, RenderPosition.AFTERBEGIN);
   }
 
-  #renderBoard() {
+  #renderTripPoints() {
     render(this.#pointsComponent, this.#pointsContainer);
 
     if (this.#pointsList.length === 0) {
