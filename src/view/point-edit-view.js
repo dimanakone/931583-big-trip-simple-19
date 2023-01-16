@@ -1,5 +1,8 @@
-import AbstractView from '../framework/view/abstract-view.js';
+import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { getDateFormat } from '../utils/point.js';
+import flatpickr from 'flatpickr';
+
+import 'flatpickr/dist/flatpickr.min.css';
 
 function createPointEditTemplate(point, destinations, offerTypes) {
 
@@ -29,11 +32,16 @@ function createPointEditTemplate(point, destinations, offerTypes) {
     </div>`;
   };
 
+  const createPictureMarkup = (picture) => `<img class="event__photo" src="${picture.src}" alt="${picture.description}">`;
+
+  const associatedDestination = destinations.find((el) => el.id === destination);
+
   const typeListMarkup = createTypeListMarkup();
-  const destinationsListMarkup = destinations.map((city) => `<option value="${city.name}"></option>`).join(' ');
+  const destinationsListMarkup = destinations.map((city) => `<option value="${city.name}" id=""></option>`).join(' ');
   const offersMarkup = offers.map((el) => createOfferMarkup(el)).join(' ');
-  const destinationMarkup = destinations.find((el) => el.id === destination).name;
-  const descriptionMarkup = destinations.find((el) => el.id === destination).description;
+  const destinationMarkup = associatedDestination.name;
+  const descriptionMarkup = associatedDestination.description;
+  const picturesMarkup = associatedDestination.pictures.map((picture) => createPictureMarkup(picture)).join(' ');
 
   return (
     `<li class="trip-events__item">
@@ -78,7 +86,7 @@ function createPointEditTemplate(point, destinations, offerTypes) {
             <span class="visually-hidden">Price</span>
             &euro;
           </label>
-          <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${price}">
+          <input class="event__input  event__input--price" id="event-price-1" type="number" min="1" name="event-price" value="${price}">
         </div>
 
         <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
@@ -99,6 +107,11 @@ function createPointEditTemplate(point, destinations, offerTypes) {
         <section class="event__section  event__section--destination">
           <h3 class="event__section-title  event__section-title--destination">Destination</h3>
           <p class="event__destination-description">${descriptionMarkup}</p>
+          <div class="event__photos-container">
+          <div class="event__photos-tape">
+            ${picturesMarkup}
+          </div>
+        </div>
         </section>
       </section>
     </form>
@@ -106,10 +119,12 @@ function createPointEditTemplate(point, destinations, offerTypes) {
   );
 }
 
-export default class PointEditView extends AbstractView {
-  #point = null;
+export default class PointEditView extends AbstractStatefulView {
   #destinations = null;
   #offerTypes = null;
+
+  #datepickerStart = null;
+  #datepickerFinish = null;
 
   #handleFormSubmit = null;
   #handleEditClick = null;
@@ -117,22 +132,106 @@ export default class PointEditView extends AbstractView {
   constructor({ point, destinations, offerTypes, onFormSubmit, onEditClick }) {
     super();
 
-    this.#point = point;
+    this._setState(PointEditView.parsePointToState(point));
     this.#destinations = destinations;
     this.#offerTypes = offerTypes;
 
     this.#handleFormSubmit = onFormSubmit;
-    this.element.querySelector('form')
-      .addEventListener('submit', this.#formSubmitHandler);
-
     this.#handleEditClick = onEditClick;
-    this.element.querySelector('.event__rollup-btn')
-      .addEventListener('click', this.#editClickHandler);
+
+    this._restoreHandlers();
+    this.#setDatePicker();
   }
 
   get template() {
-    return createPointEditTemplate(this.#point, this.#destinations, this.#offerTypes);
+    return createPointEditTemplate(this._state, this.#destinations, this.#offerTypes);
   }
+
+  removeElement() {
+    super.removeElement();
+
+    if (this.#datepickerStart) {
+      this.#datepickerStart.destroy();
+      this.#datepickerStart = null;
+    }
+
+    if (this.#datepickerFinish) {
+      this.#datepickerFinish.destroy();
+      this.#datepickerFinish = null;
+    }
+  }
+
+  reset(point) {
+    this.updateElement(
+      PointEditView.parsePointToState(point)
+    );
+  }
+
+  #setDatePicker() {
+    if (this.#datepickerStart) {
+      this.#datepickerStart.destroy();
+      this.#datepickerStart = null;
+    }
+    if (this.#datepickerFinish) {
+      this.#datepickerFinish.destroy();
+      this.#datepickerFinish = null;
+    }
+
+    this.#datepickerStart = flatpickr(
+      this.element.querySelector('#event-start-time-1'),
+      {
+        dateFormat: 'd/m/y H:i',
+        enableTime: true,
+        defaultDate: this._state.dateFrom,
+        onChange: this.#startDateChangeHandler
+      }
+    );
+
+    this.#datepickerFinish = flatpickr(
+      this.element.querySelector('#event-end-time-1'),
+      {
+        minDate: this._state.dateFrom,
+        dateFormat: 'd/m/y H:i',
+        enableTime: true,
+        defaultDate: this._state.dateTo,
+        onChange: this.#endDateChangeHandler
+      }
+    );
+  }
+
+  _restoreHandlers() {
+    this.element.querySelector('form').addEventListener('submit', this.#formSubmitHandler);
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#editClickHandler);
+
+    this.element.querySelector('.event__type-group').addEventListener('change', this.#typeChangeHandler);
+    this.element.querySelector('.event__input--destination').addEventListener('change', this.#destinationChangeHandler);
+    this.element.querySelector('.event__input--price').addEventListener('input', this.#priceInputHandler);
+
+    this.#setDatePicker();
+  }
+
+  #startDateChangeHandler = ([userDate]) => {
+    if (userDate < this._state.dateTo) {
+      this.updateElement({
+        dateFrom: userDate,
+        dateTo: this._state.dateTo
+      });
+    } else {
+      this.updateElement({
+        dateFrom: userDate,
+        dateTo: userDate
+      });
+    }
+
+    this.#datepickerFinish.set('minDate', userDate);
+  };
+
+  #endDateChangeHandler = ([userDate]) => {
+    this.updateElement({
+      dateFrom: this._state.dateFrom,
+      dateTo: userDate
+    });
+  };
 
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
@@ -143,4 +242,39 @@ export default class PointEditView extends AbstractView {
     evt.preventDefault();
     this.#handleEditClick();
   };
+
+  #typeChangeHandler = (evt) => {
+    evt.preventDefault();
+
+    this.updateElement({
+      type: evt.target.value,
+      offers: this.#offerTypes.find((el) => el.type === evt.target.value).offers
+    });
+  };
+
+  #destinationChangeHandler = (evt) => {
+    evt.preventDefault();
+
+    const destination = this.#destinations.find((item) => item.name === evt.target.value);
+
+    this.updateElement({
+      destination: destination.id
+    });
+  };
+
+  #priceInputHandler = (evt) => {
+    evt.preventDefault();
+
+    this._setState({
+      price: evt.target.value,
+    });
+  };
+
+  static parsePointToState(point) {
+    return {...point};
+  }
+
+  static parseStateToPoint(state) {
+    return {...state};
+  }
 }
