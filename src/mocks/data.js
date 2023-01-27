@@ -1,6 +1,7 @@
 import {
   getRandomInt,
   getRandomElementArray,
+  getRandomRiver,
   getRandomDate,
   increaseRandomDate,
 } from '../utils/common.js';
@@ -26,7 +27,6 @@ const OFFER_PRICES = [20, 50, 100, 200, 350];
 const generateOffer = (title) => ({
   title,
   price: OFFER_PRICES[getRandomInt(0, OFFER_PRICES.length - 1)],
-  isChecked: Boolean(Math.round(Math.random())),
 });
 
 // Получает массив из всех офферов на основе заголовков офферов
@@ -44,7 +44,7 @@ const getOffersData = () => {
 const getRandomOffersData = () => {
   const randomOffers = [];
   const offersData = getOffersData();
-  for (let i = 0; i < getRandomInt(3, 5); i++) {
+  for (let i = 0; i < getRandomInt(3, 6); i++) {
     const randomOffer = getRandomElementArray(offersData);
     if (!randomOffers.includes(randomOffer)) {
       randomOffers.push(randomOffer);
@@ -108,7 +108,10 @@ const getDestinationsData = () => {
 const generatePoint = (offers, destinations) => {
   const date = getRandomDate();
   const type = TRIP_TYPES[getRandomInt(0, TRIP_TYPES.length - 1)];
-  const typeOffers = offers.find((el) => el.type === type ).offers;
+
+  const offersType = [...offers].find((el) => el.type === type ).offers;
+  const quentity = getRandomInt(0, offersType.length);
+  const checkedOffers = getRandomRiver(quentity, offersType);
 
   return {
     id: nanoid(),
@@ -116,7 +119,7 @@ const generatePoint = (offers, destinations) => {
     dateFrom: date,
     dateTo: increaseRandomDate(date),
     destination: getRandomElementArray(destinations).id,
-    offers: typeOffers,
+    offers: checkedOffers,
     type: type,
   };
 };
@@ -125,4 +128,5 @@ export {
   generatePoint,
   getDestinationsData,
   getOffersByTypeData,
+  TRIP_TYPES
 };

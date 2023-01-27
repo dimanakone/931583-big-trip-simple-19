@@ -1,15 +1,9 @@
-import { FilterType } from '../utils/const.js';
+import {FilterType} from '../utils/const.js';
 
-const filterTitleMap = {
-  [FilterType.EVERYTHING]: 'Everything',
-  [FilterType.FUTURE]: 'Future',
-};
-
-const filters = Object.entries(filterTitleMap).map(([value, title]) => ({title, value}));
-
-const filterCallback = {
+const filter = {
   [FilterType.EVERYTHING]: (points) => points,
-  [FilterType.FUTURE]: (points) => points.filter((point) => point.dateFrom > Date.now()),
+  [FilterType.FUTURE]: (points) => points.filter((point)=> point.dateFrom >= Date.now()),
+  [FilterType.PAST]: (points) => points.filter((point) => point.dateTo < Date.now()),
 };
 
-export { filters, filterCallback };
+export {filter};

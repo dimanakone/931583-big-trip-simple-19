@@ -1,6 +1,8 @@
 import {render, replace, remove} from '../framework/render.js';
 import PointView from '../view/point-view.js';
 import PointEditView from '../view/point-edit-view.js';
+import {UserAction, UpdateType} from '../utils/const.js';
+import { isDatesEqual } from '../utils/point.js';
 
 const Mode = {
   DEFAULT: 'DEFAULT',
@@ -8,7 +10,8 @@ const Mode = {
 };
 
 export default class PointPresenter {
-  #pointsContainer = null;
+  #tripRouteContainer = null;
+  #handleDataChange = null;
   #handleModeChange = null;
 
   #pointComponent = null;
@@ -19,15 +22,17 @@ export default class PointPresenter {
   #offerTypes = null;
   #mode = Mode.DEFAULT;
 
-  constructor({pointsContainer, onModeChange}) {
-    this.#pointsContainer = pointsContainer;
+  constructor({tripRouteContainer, onModeChange, onDataChange, destinations, offerTypes}) {
+    this.#destinations = destinations;
+    this.#offerTypes = offerTypes;
+
+    this.#tripRouteContainer = tripRouteContainer;
+    this.#handleDataChange = onDataChange;
     this.#handleModeChange = onModeChange;
   }
 
-  init(point, destinations, offerTypes) {
+  init(point) {
     this.#point = point;
-    this.#destinations = destinations;
-    this.#offerTypes = offerTypes;
 
     const prevPointComponent = this.#pointComponent;
     const prevPointEditComponent = this.#pointEditComponent;
@@ -42,11 +47,12 @@ export default class PointPresenter {
       destinations: this.#destinations,
       offerTypes: this.#offerTypes,
       onFormSubmit: this.#handleFormSubmit,
+      onDeleteClick: this.#handleDeleteClick,
       onEditClick: this.#handleFormSubmit
     });
 
     if (prevPointComponent === null || prevPointEditComponent === null) {
-      render(this.#pointComponent, this.#pointsContainer);
+      render(this.#pointComponent, this.#tripRouteContainer);
       return;
     }
 
@@ -99,7 +105,21 @@ export default class PointPresenter {
     this.#replaceCardToForm();
   };
 
-  #handleFormSubmit = () => {
+  #handleFormSubmit = (update) => {
+    const isMinorUpdate = !isDatesEqual(this.#point.dateFrom, update.dateFrom) || !isDatesEqual(this.#point.dateTo, update.dateTo);
+    this.#handleDataChange(
+      UserAction.UPDATE_POINT,
+      isMinorUpdate ? UpdateType.MINOR : UpdateType.PATCH,
+      update
+    );
     this.#replaceFormToCard();
+  };
+
+  #handleDeleteClick = (point) => {
+    this.#handleDataChange(
+      UserAction.DELETE_POINT,
+      UpdateType.MINOR,
+      point,
+    );
   };
 }

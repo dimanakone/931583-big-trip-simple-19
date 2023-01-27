@@ -6,6 +6,12 @@ const getRandomInt = (a = 1, b = 0) => {
 
 const getRandomElementArray = (items) => items[Math.floor(Math.random() * items.length)];
 
+const getRandomRiver = (n, arr) => [...arr]
+  .map((x) => ({ x, r: Math.random() }))
+  .sort((a, b) => a.r - b.r)
+  .map((a) => a.x)
+  .slice(0, n);
+
 const getRandomDate = function(minuteRange = 60, hourRange = 23, rangeOfDays = 5 ){
   const today = new Date(Date.now());
   return new Date(today.getYear() + 1900,today.getMonth(), today.getDate() + Math.random() * rangeOfDays, Math.random() * hourRange, Math.random() * minuteRange);
@@ -18,14 +24,10 @@ const increaseRandomDate = (date, minuteRange = 60, hourRange = 5) => {
   return newDate;
 };
 
-function updateItem(items, update) {
-  return items.map((item) => item.id === update.id ? update : item);
-}
-
 export {
   getRandomInt,
   getRandomElementArray,
+  getRandomRiver,
   getRandomDate,
   increaseRandomDate,
-  updateItem
 };

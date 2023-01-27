@@ -12,7 +12,7 @@ function createPointTemplate(points, destinations) {
       <span class="event__offer-price">${offer.price}</span>
     </li>`;
 
-  const offersListMarkup = offers.filter((item) => item.isChecked === true).map((item) => createOfferElementMarkup(item)).join(' ');
+  const offersListMarkup = offers.map((item) => createOfferElementMarkup(item)).join(' ');
   const destinationMarkup = destinations.find((el) => el.id === destination).name;
 
 
