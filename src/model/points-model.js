@@ -1,48 +1,51 @@
 import Observable from '../framework/observable.js';
 
-import {
-  generatePoint,
-  getDestinationsData,
-  getOffersByTypeData
-} from '../mocks/data.js';
-
-const TASK_COUNT = 8;
-
-const offersByType = getOffersByTypeData();
-const destinations = getDestinationsData();
-const getPoint = () => generatePoint(offersByType,destinations);
+import {UpdateType} from '../utils/const.js';
 
 export default class PointsModel extends Observable {
-  #offersByType = offersByType;
-  #destinations = destinations;
-  #points = Array.from({length: TASK_COUNT}, getPoint);
+  #points = [];
+
+  #api = null;
+
+  constructor({ api }) {
+    super();
+    this.#api = api;
+  }
 
   get points() {
     return this.#points;
   }
 
-  get allDestinations() {
-    return this.#destinations;
+  async init() {
+    try {
+      const points = await this.#api.points;
+      this.#points = points.map(this.#adaptToClient);
+    } catch(err) {
+      this.#points = [];
+    }
+
+    this._notify(UpdateType.INIT);
   }
 
-  get allOffersByType() {
-    return this.#offersByType;
-  }
-
-  updatePoint(updateType, update) {
+  async updatePoint(updateType, update) {
     const index = this.#points.findIndex((point) => point.id === point.id);
 
     if (index === -1) {
       throw new Error('Can\'t update unexisting point');
     }
 
-    this.#points = [
-      ...this.#points.slice(0, index),
-      update,
-      ...this.#points.slice(index + 1),
-    ];
-
-    this._notify(updateType, update);
+    try {
+      const response = await this.#api.updatePoint(update);
+      const updatedPoint = this.#adaptToClient(response);
+      this.#points = [
+        ...this.#points.slice(0, index),
+        updatedPoint,
+        ...this.#points.slice(index + 1),
+      ];
+      this._notify(updateType, updatedPoint);
+    } catch(err) {
+      throw new Error('Can\'t update point');
+    }
   }
 
   addPoint(updateType, update) {
@@ -67,6 +70,20 @@ export default class PointsModel extends Observable {
     ];
 
     this._notify(updateType);
+  }
+
+  #adaptToClient(points) {
+    const adaptedPoint = {...points,
+      dateFrom: points['date_from'] !== null ? new Date(points['date_from']) : points['date_from'],
+      dateTo: points['date_to'] !== null ? new Date(points['date_to']) : points['date_to'],
+      price: points['base_price'],
+    };
+
+    delete adaptedPoint['date_from'];
+    delete adaptedPoint['date_to'];
+    delete adaptedPoint['base_price'];
+
+    return adaptedPoint;
   }
 }
 

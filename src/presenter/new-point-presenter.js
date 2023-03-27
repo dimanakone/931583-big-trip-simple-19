@@ -9,13 +9,13 @@ export default class NewPointPresenter {
   #handleDestroy = null;
 
   #destinations = null;
-  #offerTypes = null;
+  #offers = null;
 
   #pointEditComponent = null;
 
-  constructor({destinations, offerTypes, tripRouteContainer, onDataChange, onDestroy}) {
+  constructor({destinations, offers, tripRouteContainer, onDataChange, onDestroy}) {
     this.#destinations = destinations;
-    this.#offerTypes = offerTypes;
+    this.#offers = offers;
 
     this.#tripRouteContainer = tripRouteContainer;
     this.#handleDataChange = onDataChange;
@@ -29,7 +29,7 @@ export default class NewPointPresenter {
 
     this.#pointEditComponent = new PointEditView({
       destinations: this.#destinations,
-      offerTypes: this.#offerTypes,
+      offers: this.#offers,
       onFormSubmit: this.#handleFormSubmit,
       onDeleteClick: this.#handleDeleteClick
     });

@@ -2,8 +2,8 @@ import {render, remove, RenderPosition} from '../framework/render.js';
 
 import SortView from '../view/sort-view.js';
 import TripRouteView from '../view/trip-route-view.js';
-import PointAddView from '../view/point-add-view.js';
 import NoPointsView from '../view/no-points-view.js';
+import LoadingView from '../view/loading-view.js';
 
 import PointPresenter from './point-presenter.js';
 import NewPointPresenter from './new-point-presenter.js';
@@ -15,9 +15,12 @@ import {SortType, FilterType, UpdateType, UserAction} from '../utils/const.js';
 export default class TripRoutePresenter {
   #tripRouteComponent = new TripRouteView();
   #sortComponent = null;
+  #loadingComponent = new LoadingView();
   #noPointsComponent = null;
 
   #pointsModel = null;
+  #offersModel = null;
+  #destinationsModel = null;
   #filterModel = null;
 
   #pointPresenter = new Map();
@@ -28,21 +31,24 @@ export default class TripRoutePresenter {
   #allOffersByTypeList = [];
   #currentSortType = SortType.DAY;
   #filterType = FilterType.FUTURE;
+  #isLoading = true;
 
-  constructor({ tripRouteContainer, pointsModel, filterModel, onNewPointDestroy }) {
+  constructor({ tripRouteContainer, pointsModel, offersModel, destinationsModel, filterModel, onNewPointDestroy }) {
     this.#tripRouteContainer = tripRouteContainer;
     this.#pointsModel = pointsModel;
+    this.#offersModel = offersModel;
+    this.#destinationsModel = destinationsModel;
     this.#filterModel = filterModel;
 
-    this.#allDestinationsList = [...this.#pointsModel.allDestinations];
-    this.#allOffersByTypeList = [...this.#pointsModel.allOffersByType];
+    this.#allDestinationsList = [...this.#destinationsModel.destinations];
+    this.#allOffersByTypeList = [...this.#offersModel.offers];
 
     this.#newPointPresenter = new NewPointPresenter({
       tripRouteContainer: this.#tripRouteComponent.element,
       onDataChange: this.#handleViewAction,
       onDestroy: onNewPointDestroy,
       destinations: this.#allDestinationsList,
-      offerTypes: this.#allOffersByTypeList,
+      offers: this.#allOffersByTypeList,
     });
 
     this.#pointsModel.addObserver(this.#handleModelEvent);
@@ -106,6 +112,11 @@ export default class TripRoutePresenter {
         this.#clearTripRoute({resetSortType: true});
         this.#renderTripRoute();
         break;
+      case UpdateType.INIT:
+        this.#isLoading = false;
+        remove(this.#loadingComponent);
+        this.#renderTripRoute();
+        break;
     }
   };
 
@@ -133,7 +144,7 @@ export default class TripRoutePresenter {
       onDataChange: this.#handleViewAction,
       onModeChange: this.#handleModeChange,
       destinations: this.#allDestinationsList,
-      offerTypes: this.#allOffersByTypeList,
+      offers: this.#allOffersByTypeList,
     });
 
     pointPresenter.init(point);
@@ -153,12 +164,17 @@ export default class TripRoutePresenter {
     render(this.#noPointsComponent, this.#tripRouteComponent.element, RenderPosition.AFTERBEGIN);
   }
 
+  #renderLoading() {
+    render(this.#loadingComponent, this.#tripRouteComponent.element, RenderPosition.AFTERBEGIN);
+  }
+
   #clearTripRoute({resetSortType = false} = {}) {
     this.#newPointPresenter.destroy();
     this.#pointPresenter.forEach((presenter) => presenter.destroy());
     this.#pointPresenter.clear();
 
     remove(this.#sortComponent);
+    remove(this.#loadingComponent);
 
     if (this.#noPointsComponent) {
       remove(this.#noPointsComponent);
@@ -171,6 +187,11 @@ export default class TripRoutePresenter {
 
   #renderTripRoute() {
     render(this.#tripRouteComponent, this.#tripRouteContainer);
+
+    if (this.#isLoading) {
+      this.#renderLoading();
+      return;
+    }
 
     if (!this.points.length) {
       this.#renderNoPoints();

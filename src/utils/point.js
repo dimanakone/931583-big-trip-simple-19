@@ -1,5 +1,4 @@
 import dayjs from 'dayjs';
-import { TRIP_TYPES } from '../mocks/data.js';
 
 const getDateFormat = ((date) => dayjs(date).format('YY/MM/DD HH:mm'));
 const getDateISO = ((date) => dayjs(date).format('YYYY-MM-DDTHH:mm'));
@@ -10,7 +9,7 @@ const isDatesEqual = (dateA, dateB) =>
   (dateA === null && dateB === null) ? true : dayjs(dateA).isSame(dateB, 'D');
 
 const DEFAULT_POINT = {
-  type:TRIP_TYPES[0],
+  type: 'taxi',
   dateFrom: new Date(),
   dateTo: new Date(),
   price: 150,
