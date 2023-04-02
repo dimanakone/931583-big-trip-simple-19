@@ -18,13 +18,13 @@ export default class PointPresenter {
   #pointEditComponent = null;
 
   #point = null;
-  #destinations = null;
-  #offers = null;
+  #destinationsModel = null;
+  #offersModel = null;
   #mode = Mode.DEFAULT;
 
-  constructor({tripRouteContainer, onModeChange, onDataChange, destinations, offers}) {
-    this.#destinations = destinations;
-    this.#offers = offers;
+  constructor({tripRouteContainer, onModeChange, onDataChange, destinationsModel, offersModel}) {
+    this.#destinationsModel = destinationsModel;
+    this.#offersModel = offersModel;
 
     this.#tripRouteContainer = tripRouteContainer;
     this.#handleDataChange = onDataChange;
@@ -39,17 +39,18 @@ export default class PointPresenter {
 
     this.#pointComponent = new PointView({
       point: this.#point,
-      destinations: this.#destinations,
+      offerTypes: this.#offersModel.offers,
+      destinations: this.#destinationsModel.destinations,
       onEditClick: this.#handleEditClick
     });
 
     this.#pointEditComponent = new PointEditView({
       point: this.#point,
-      destinations: this.#destinations,
-      offers: this.#offers,
+      destinations: this.#destinationsModel.destinations,
+      offerTypes: this.#offersModel.offers,
       onFormSubmit: this.#handleFormSubmit,
       onDeleteClick: this.#handleDeleteClick,
-      onEditClick: this.#handleFormSubmit
+      onCloseClick: this.#handleCloseClick
     });
 
     if (prevPointComponent === null || prevPointEditComponent === null) {
@@ -100,6 +101,11 @@ export default class PointPresenter {
       this.#pointEditComponent.reset(this.#point);
       this.#replaceFormToCard();
     }
+  };
+
+  #handleCloseClick = () => {
+    this.#pointEditComponent.reset(this.#point);
+    this.#replaceFormToCard();
   };
 
   #handleEditClick = () => {

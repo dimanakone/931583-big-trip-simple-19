@@ -27,8 +27,6 @@ export default class TripRoutePresenter {
   #newPointPresenter = null;
 
   #tripRouteContainer = null;
-  #allDestinationsList = [];
-  #allOffersByTypeList = [];
   #currentSortType = SortType.DAY;
   #filterType = FilterType.FUTURE;
   #isLoading = true;
@@ -40,15 +38,12 @@ export default class TripRoutePresenter {
     this.#destinationsModel = destinationsModel;
     this.#filterModel = filterModel;
 
-    this.#allDestinationsList = [...this.#destinationsModel.destinations];
-    this.#allOffersByTypeList = [...this.#offersModel.offers];
-
     this.#newPointPresenter = new NewPointPresenter({
       tripRouteContainer: this.#tripRouteComponent.element,
       onDataChange: this.#handleViewAction,
       onDestroy: onNewPointDestroy,
-      destinations: this.#allDestinationsList,
-      offers: this.#allOffersByTypeList,
+      destinationsModel: this.#destinationsModel,
+      offersModel: this.#offersModel
     });
 
     this.#pointsModel.addObserver(this.#handleModelEvent);
@@ -143,8 +138,8 @@ export default class TripRoutePresenter {
       tripRouteContainer: this.#tripRouteComponent.element,
       onDataChange: this.#handleViewAction,
       onModeChange: this.#handleModeChange,
-      destinations: this.#allDestinationsList,
-      offers: this.#allOffersByTypeList,
+      destinationsModel: this.#destinationsModel,
+      offersModel: this.#offersModel
     });
 
     pointPresenter.init(point);

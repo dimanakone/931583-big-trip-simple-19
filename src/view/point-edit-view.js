@@ -24,7 +24,7 @@ function createPointEditTemplate(point, destinations, offerTypes) {
     const offersByType = offerTypes.find((offer) => offer.type === type).offers;
 
     return offersByType.map((offer) => {
-      const isOfferChecked = checkedOffers.some((userOffer) => offer.title === userOffer.title);
+      const isOfferChecked = checkedOffers.some((userOffer) => offer.id === userOffer);
       return `
     <div class="event__offer-selector">
         <input
@@ -139,17 +139,17 @@ export default class PointEditView extends AbstractStatefulView {
   #datepickerFinish = null;
 
   #handleFormSubmit = null;
-  #handleEditClick = null;
+  #handleCloseClick = null;
   #handleDeleteClick = null;
 
-  constructor({ point = DEFAULT_POINT, destinations, offerTypes, onFormSubmit, onEditClick, onDeleteClick }) {
+  constructor({ point = DEFAULT_POINT, destinations, offerTypes, onFormSubmit, onCloseClick, onDeleteClick }) {
     super();
 
     this._setState(PointEditView.parsePointToState(point));
     this.#destinations = destinations;
     this.#offerTypes = offerTypes;
 
-    this.#handleEditClick = onEditClick;
+    this.#handleCloseClick = onCloseClick;
     this.#handleFormSubmit = onFormSubmit;
     this.#handleDeleteClick = onDeleteClick;
 
@@ -215,13 +215,13 @@ export default class PointEditView extends AbstractStatefulView {
 
   _restoreHandlers() {
     this.element.querySelector('form').addEventListener('submit', this.#formSubmitHandler);
-    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#editClickHandler);
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#closeClickHandler);
     this.element.querySelector('.event__reset-btn').addEventListener('click', this.#formDeleteClickHandler);
 
     this.element.querySelector('.event__type-group').addEventListener('change', this.#typeChangeHandler);
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#destinationChangeHandler);
     this.element.querySelector('.event__input--price').addEventListener('input', this.#priceInputHandler);
-    this.element.querySelector('.event__details').addEventListener('input', this.#offersSelectionHandler);
+    this.element.querySelector('.event__details').addEventListener('change', this.#offersSelectionHandler);
 
     this.#setDatePicker();
   }
@@ -260,13 +260,18 @@ export default class PointEditView extends AbstractStatefulView {
 
   #offersSelectionHandler = (evt) => {
     evt.preventDefault();
-    const { price, title, id } = evt.target.dataset;
 
-    this.updateElement({
-      offers: evt.target.checked
-        ? [...this._state.offers, {id, title, price: Number(price)}]
-        : [...this._state.offers.filter((offer) => offer.title !== title)],
-    });
+    const id = Number(evt.target.dataset.id);
+
+    if (evt.target.checked) {
+      this.updateElement({
+        offers: [...this._state.offers, id]
+      });
+    } else {
+      this.updateElement({
+        offers: [...this._state.offers].filter((offer) => offer !== id)
+      });
+    }
   };
 
   #destinationChangeHandler = (evt) => {
@@ -296,9 +301,9 @@ export default class PointEditView extends AbstractStatefulView {
     });
   };
 
-  #editClickHandler = (evt) => {
+  #closeClickHandler = (evt) => {
     evt.preventDefault();
-    this.#handleEditClick();
+    this.#handleCloseClick();
   };
 
   #formSubmitHandler = (evt) => {

@@ -1,6 +1,5 @@
 import {remove, render, RenderPosition} from '../framework/render.js';
 import PointEditView from '../view/point-edit-view.js';
-import {nanoid} from 'nanoid';
 import {UserAction, UpdateType} from '../utils/const.js';
 
 export default class NewPointPresenter {
@@ -8,14 +7,14 @@ export default class NewPointPresenter {
   #handleDataChange = null;
   #handleDestroy = null;
 
-  #destinations = null;
-  #offers = null;
+  #destinationsModel = null;
+  #offersModel = null;
 
   #pointEditComponent = null;
 
-  constructor({destinations, offers, tripRouteContainer, onDataChange, onDestroy}) {
-    this.#destinations = destinations;
-    this.#offers = offers;
+  constructor({destinationsModel, offersModel, tripRouteContainer, onDataChange, onDestroy}) {
+    this.#destinationsModel = destinationsModel;
+    this.#offersModel = offersModel;
 
     this.#tripRouteContainer = tripRouteContainer;
     this.#handleDataChange = onDataChange;
@@ -28,10 +27,11 @@ export default class NewPointPresenter {
     }
 
     this.#pointEditComponent = new PointEditView({
-      destinations: this.#destinations,
-      offers: this.#offers,
+      destinations: this.#destinationsModel.destinations,
+      offerTypes: this.#offersModel.offers,
       onFormSubmit: this.#handleFormSubmit,
-      onDeleteClick: this.#handleDeleteClick
+      onDeleteClick: this.#handleDeleteClick,
+      onCloseClick: this.#handleCloseClick
     });
 
     render(this.#pointEditComponent, this.#tripRouteContainer, RenderPosition.AFTERBEGIN);
@@ -56,10 +56,12 @@ export default class NewPointPresenter {
     this.#handleDataChange(
       UserAction.ADD_POINT,
       UpdateType.MINOR,
-      // Пока у нас нет сервера, который бы после сохранения
-      // выдывал честный id задачи, нам нужно позаботиться об этом самим
-      {id: nanoid(), ...point},
+      point
     );
+    this.destroy();
+  };
+
+  #handleCloseClick = () => {
     this.destroy();
   };
 
